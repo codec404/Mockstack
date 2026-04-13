@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── chat-service ────────────────────────────────────────────────────────────
+  chat-service:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: chat-service
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: lint
+        run: |
+          pip install ruff
+          ruff check app tests
+      - name: type-check
+        run: |
+          pip install mypy types-redis
+          mypy app --ignore-missing-imports --no-strict-optional
+      - name: tests
+        run: pytest --cov=app --cov-report=xml --cov-fail-under=60
+        env:
+          DATABASE_URL: "postgresql+asyncpg://mock:mock@localhost:5432/mockstack"
+          REDIS_URL: "redis://localhost:6379/0"
+          JWT_SECRET: "ci-secret-key"
+
+  # ── ai-service ──────────────────────────────────────────────────────────────
+  ai-service:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ai-service
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: pip install pytest pytest-asyncio ruff
+      - name: lint
+        run: ruff check app tests
+      - name: tests
+        run: pytest
+
+  # ── workers ─────────────────────────────────────────────────────────────────
+  workers:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: workers
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: pip install ruff
+      - name: lint
+        run: ruff check app tests
+      - name: tests
+        run: pytest
+        env:
+          DATABASE_URL: "postgresql+asyncpg://mock:mock@localhost:5432/mockstack"
+          REDIS_URL: "redis://localhost:6379/0"
+
+  # ── frontend ─────────────────────────────────────────────────────────────────
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: type-check
+        run: npx tsc --noEmit -p tsconfig.app.json
+      - name: build
+        run: npm run build -- --configuration production

@@ -1,0 +1,7 @@
+project_id  = "your-gcp-project-id"
+region      = "us-central1"
+env         = "prod"
+db_user     = "mockstack"
+db_password = "change-me-strong-password"
+jwt_secret  = "change-me-strong-jwt-secret"
+image_tag   = "v1.0.0"

@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  ai-service:
+    build: .
+    env_file:
+      - .env
+    ports:
+      - "50051:50051"
+    networks:
+      - mockstack
+
+networks:
+  mockstack:
+    name: mockstack-network

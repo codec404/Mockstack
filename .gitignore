@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Env files (never commit real secrets)
+.env
+!.env.example
+
+# Node / Angular
+node_modules/
+frontend/dist/
+frontend/.angular/cache/
+*.tsbuildinfo
+
+# Terraform state / secrets
+infra/**/*.tfstate
+infra/**/*.tfstate.backup
+infra/**/.terraform/
+infra/**/terraform.tfvars
+!infra/**/terraform.tfvars.example
+
+# Docker
+docker-compose.override.yml
+
+# IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp

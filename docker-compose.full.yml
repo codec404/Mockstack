@@ -1,0 +1,115 @@
+version: "3.9"
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: mock
+      POSTGRES_PASSWORD: mock
+      POSTGRES_DB: mockstack
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mock -d mockstack"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    logging: *default-logging
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    logging: *default-logging
+
+  ai-service:
+    build:
+      context: ./ai-service
+    environment:
+      - ENV=dev
+      - GRPC_HOST=0.0.0.0
+      - GRPC_PORT=50051
+    ports:
+      - "50051:50051"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import grpc; ch = grpc.insecure_channel('localhost:50051'); grpc.channel_ready_future(ch).result(timeout=5)\""]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    logging: *default-logging
+
+  chat-service:
+    build:
+      context: ./chat-service
+    env_file:
+      - ./chat-service/.env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://mock:mock@postgres:5432/mockstack
+      - REDIS_URL=redis://redis:6379/0
+      - AI_GRPC_TARGET=ai-service:50051
+      - ENV=dev
+      - CORS_ORIGINS=http://localhost:4200,http://127.0.0.1:4200
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ai-service:
+        condition: service_started
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    logging: *default-logging
+
+  workers:
+    build:
+      context: ./workers
+    env_file:
+      - ./workers/.env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://mock:mock@postgres:5432/mockstack
+      - REDIS_URL=redis://redis:6379/0
+      - ENV=dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    logging: *default-logging
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      chat-service:
+        condition: service_healthy
+    restart: unless-stopped
+    logging: *default-logging
+
+volumes:
+  postgres_data:
