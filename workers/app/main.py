@@ -8,6 +8,7 @@ import structlog
 from redis.asyncio import Redis
 
 from app.core.config import settings
+from app.jobs.ai_job import process_ai_eval_job, process_ai_report_job
 from app.jobs.analytics_job import process_analytics_job
 from app.jobs.reminder_job import process_reminder_job
 
@@ -28,10 +29,18 @@ _running = True
 
 async def worker_loop() -> None:
     redis = Redis.from_url(settings.redis_url, decode_responses=True)
-    log.info("workers_started", queues=[settings.reminder_queue, settings.analytics_queue])
+    log.info("workers_started", queues=[
+        settings.reminder_queue,
+        settings.analytics_queue,
+        settings.ai_eval_queue,
+        settings.ai_report_queue,
+    ])
 
     while _running:
         try:
+            # AI jobs are highest priority — process first each tick
+            await process_ai_eval_job(redis)
+            await process_ai_report_job(redis)
             await process_reminder_job(redis)
             await process_analytics_job(redis)
         except Exception as exc:

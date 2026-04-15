@@ -34,6 +34,10 @@ class Settings(BaseSettings):
     # CORS – comma-separated origins (overridden via env in production)
     cors_origins: str = "http://localhost:4200,http://127.0.0.1:4200"
 
+    # Queues (shared naming with workers)
+    ai_eval_queue: str = "queue:ai_eval"
+    ai_report_queue: str = "queue:ai_report"
+
     # Security
     max_request_body_bytes: int = 1_048_576  # 1 MB
 

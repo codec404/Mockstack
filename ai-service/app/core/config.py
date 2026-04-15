@@ -10,5 +10,8 @@ class Settings(BaseSettings):
     grpc_port: int = 50051
     prompt_version: str = "v1"
 
+    gemini_api_key: str = ""
+    gemini_model: str = "gemini-1.5-flash"
+
 
 settings = Settings()  # type: ignore[call-arg]

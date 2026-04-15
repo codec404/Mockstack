@@ -14,7 +14,10 @@ htmlcov/
 
 # Env files (never commit real secrets)
 .env
+**/.env
+*.env.local
 !.env.example
+!**/.env.example
 
 # Node / Angular
 node_modules/

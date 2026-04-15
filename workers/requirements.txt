@@ -1,4 +1,5 @@
 redis[hiredis]==5.2.1
+grpcio==1.71.0
 sqlalchemy==2.0.40
 asyncpg==0.30.0
 pydantic-settings==2.9.1

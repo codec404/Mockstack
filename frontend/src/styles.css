@@ -122,18 +122,23 @@ textarea:focus-visible {
 
 /* ─── Reusable form elements (used by components via CSS vars) ──────────────── */
 input, select, textarea {
-  background: var(--surface-2);
+  background: var(--bg);
   color: var(--text);
   border: 1px solid var(--border-2);
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
-  font-size: 14px;
+  border-radius: 8px;
+  padding: 0 12px;
+  height: 38px;
+  font-size: 13.5px;
   width: 100%;
+  font-family: inherit;
   transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
 }
+textarea { height: auto; padding: 10px 12px; }
+select { cursor: pointer; }
 input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--accent-blue);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-blue) 20%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-blue) 18%, transparent);
+  background: var(--surface);
 }
-input::placeholder, textarea::placeholder { color: var(--text-muted); }
+input::placeholder, textarea::placeholder { color: var(--text-muted); font-size: 13px; }

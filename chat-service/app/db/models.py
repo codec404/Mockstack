@@ -54,6 +54,9 @@ class User(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
+    # public handle — defaults to email-local-part on signup, user-editable, must be unique
+    handle: Mapped[str | None] = mapped_column(String(50), unique=True, index=True, nullable=True)
+    avatar_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     password_hash: Mapped[str] = mapped_column(String(512), nullable=False)
     role: Mapped[UserRole] = mapped_column(Enum(UserRole, name="userrole"), default=UserRole.user, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
@@ -145,6 +148,15 @@ class Reminder(Base):
     interview: Mapped[Interview] = relationship(back_populates="reminders")
 
 
+class Friend(Base):
+    """Directional friendship: user_id → friend_id means user_id has added friend_id."""
+    __tablename__ = "friends"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    friend_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), default=_utcnow, nullable=False)
+
+
 class UserAnalyticsSnapshot(Base):
     __tablename__ = "user_analytics_snapshots"
 
@@ -152,4 +164,6 @@ class UserAnalyticsSnapshot(Base):
     total_interviews: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     avg_score: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     avg_clarity: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    total_points: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    rank_tier: Mapped[str] = mapped_column(String(30), default="Newbie", nullable=False)
     last_computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=False), default=_utcnow, nullable=False)

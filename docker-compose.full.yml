@@ -39,6 +39,8 @@ services:
   ai-service:
     build:
       context: ./ai-service
+    env_file:
+      - ./ai-service/.env
     environment:
       - ENV=dev
       - GRPC_HOST=0.0.0.0

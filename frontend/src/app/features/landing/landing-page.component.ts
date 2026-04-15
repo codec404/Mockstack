@@ -61,8 +61,8 @@ const HOW_IT_WORKS = [
             improvement report after every session.
           </p>
           <div class="hero__actions">
-            <a routerLink="/auth" class="btn btn--primary">Start Practicing Free</a>
-            <a routerLink="/auth" class="btn btn--ghost">Sign In</a>
+            <a routerLink="/auth" class="btn btn--primary">Get Started — It's Free</a>
+            <a routerLink="/auth" class="btn btn--ghost">Log in</a>
           </div>
           <div class="hero__stats">
             <div class="stat"><span class="stat__n">4</span><span class="stat__l">Interview domains</span></div>
@@ -181,7 +181,7 @@ const HOW_IT_WORKS = [
       <section class="cta-section" appReveal>
         <h2>Start your first session today.</h2>
         <p>Free to use. No setup required. Pick a domain and the AI interviewer is ready.</p>
-        <a routerLink="/auth" class="btn btn--primary btn--lg">Get Started — It's Free</a>
+        <a routerLink="/auth" class="btn btn--primary btn--lg">Create a free account</a>
       </section>
 
     </div>
